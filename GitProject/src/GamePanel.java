@@ -9,7 +9,7 @@ public class GamePanel extends JPanel implements ActionListener{
 	static final int SCREEN_HEIGHT = 600;
 	static final int UNIT_SIZE = 25;
 	static final int GAME_SIZE = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-	static final int DELAY = 80; 
+	static final int DELAY = 150; 
 	final int x[] = new int[GAME_SIZE];
 	final int y[] = new int[GAME_SIZE];
 	int bodyLength = 4;
@@ -18,6 +18,7 @@ public class GamePanel extends JPanel implements ActionListener{
 	int foodY;
 	char direction = 'R';
 	boolean running = false;
+	boolean gameOn = false;
 	Timer timer;
 	Random random;
 		
@@ -27,20 +28,29 @@ public class GamePanel extends JPanel implements ActionListener{
 		this.setBackground(Color.black);
 		this.setFocusable(true);
 		this.addKeyListener(new MyKeyAdapter());
-		startGame();
-		
+		startGame();		
 	}	
 	public void startGame() {
 		newFood();
 		running = true;
+		gameOn = true;
 		timer = new Timer(DELAY, this);
 		timer.start();
 	}		
+	public void pause() {
+		gameOn = false;
+		timer.stop();	
+		
+	}
+	public void resume() {
+		gameOn = true;
+		timer.start();
+	}
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		draw(g);		
+		draw(g);
 	}	
-	public void draw( Graphics g) {
+	public void draw(Graphics g) {
 		if (running) {
 			for (int i = 0; i < SCREEN_HEIGHT/UNIT_SIZE; i++) {
 				g.drawLine(i*UNIT_SIZE, 0, i*UNIT_SIZE, SCREEN_HEIGHT);
@@ -50,12 +60,12 @@ public class GamePanel extends JPanel implements ActionListener{
 			g.fillOval(foodX, foodY, UNIT_SIZE, UNIT_SIZE);
 			for (int i = 0; i<bodyLength; i++) {
 				if (i == 0) {
-					g.setColor(Color.red);
+					g.setColor(Color.green);
 					g.fillOval(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
 				}
 				else {
-					g.setColor(Color.green);
-					g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+					g.setColor(new Color(45,180,0));
+					g.fillOval(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
 				}
 			}
 			g.setColor(Color.red);
@@ -64,8 +74,8 @@ public class GamePanel extends JPanel implements ActionListener{
 			g.drawString("Score: " + foodCount, (SCREEN_WIDTH - metrics.stringWidth("Score: " + foodCount))/2, g.getFont().getSize());
 		}
 		else {
-			gameOver(g); 			
-		}
+			gameOver(g); 	
+		}			
 	}	
 	public void newFood() {
 		foodX = random.nextInt((int)(SCREEN_WIDTH / UNIT_SIZE))*UNIT_SIZE;
@@ -146,27 +156,35 @@ public class GamePanel extends JPanel implements ActionListener{
 	public class MyKeyAdapter extends KeyAdapter{
 		@Override 
 		public void keyPressed(KeyEvent e) {
+			Graphics g;
 			switch(e.getKeyCode()) {
-			case KeyEvent.VK_LEFT:
-				if (direction != 'R') {
-					direction = 'L';
-				}
-				break;
-			case KeyEvent.VK_RIGHT:
-				if (direction != 'L') {
-					direction = 'R';
-				}
-				break;
-			case KeyEvent.VK_UP:
-				if (direction != 'D') {
-					direction = 'U';
-				}
-				break;
-			case KeyEvent.VK_DOWN:
-				if (direction != 'U') {
-					direction = 'D';
-				}
-				break;
+				case KeyEvent.VK_LEFT:
+					if (direction != 'R') {
+						direction = 'L';
+					}
+					break;
+				case KeyEvent.VK_RIGHT:
+					if (direction != 'L') {
+						direction = 'R';
+					}
+					break;
+				case KeyEvent.VK_UP:
+					if (direction != 'D') {
+						direction = 'U';
+					}
+					break;
+				case KeyEvent.VK_DOWN:
+					if (direction != 'U') {
+						direction = 'D';
+					}
+					break;
+				case KeyEvent.VK_SPACE:
+					if(gameOn) {
+						pause();
+					} else {
+						resume();
+					}
+					break;
 			}				
 		}
 	}
